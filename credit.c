@@ -3,31 +3,23 @@
 #include <stdlib.h>
 #include <math.h>
 
-const int MIN_CARD_LEN = 13;
-const int MAX_CARD_LEN = 16;
-
 long int get_card_number(void);
-int get_card_length(long int);
 char* get_card_type(long int, int);
-int luhn_check(int);
+int luhn_check(long int, int);
 int main(void)
 {
   long int card_number = get_card_number();
-  int card_length = get_card_length(card_number);
+  int card_length = (int) floor(log10(labs(card_number))) + 1;
 
-  // get card type ( card number ) -> str card_type
   char* card_type = get_card_type(card_number, card_length);
 
   if (strcmp(card_type, "INVALID") == 0)
   {
-    printf("FROM CARD TYPE\n");
     printf("INVALID\n");
     return 0;
   }
 
-  // luhn check (card_number) -> bool
-  //if (luhn_check(card_number))
-  if (1)
+  if (luhn_check(card_number, card_length))
   {
     printf("%s\n", card_type);
   }
@@ -35,17 +27,9 @@ int main(void)
   {
     printf("INVALID\n");
   }
-
   return 0;
 }
 
-int get_card_length(long int num)
-{
-  return (int) floor(log10(labs(num))) + 1;
-}
-
-
-int length_check(long int);
 long int get_card_number(void)
 {
   long int card_number;
@@ -56,21 +40,64 @@ long int get_card_number(void)
       printf("Please enter an integer\ncard number: ");
       scanf("%*[^\n]");
     }
-
-  while(!length_check(card_number))
-  {
-    printf("valid lengths are between 13 and 16 digits\ncard number: ");
-    scanf("%ld", &card_number);
-  }
-
   return card_number;
 }
 
-int length_check(long int n)
-{
-  int l = get_card_length(n);
 
-  if (l >= MIN_CARD_LEN && l <= MAX_CARD_LEN)
+char* get_card_type(long int card_number, int card_length)
+{
+  int first_two = (card_number / (long int) pow (10, card_length-2));
+
+  // All American Express numbers start with 34 or 37 and are 15 digits
+  if (first_two == 34 || first_two == 37)
+  {
+    if (card_length != 15)
+    {
+      return "INVALID";
+    }
+    else
+    {
+      return "AMEX";
+    }
+  }
+  // most MasterCard numbers start with 51, 52, 53, 54, or 55 and are 16 digits
+  else if(first_two >= 51 && first_two <= 55)
+  {
+    if (card_length != 16)
+    {
+      return "INVALID";
+    }
+    else
+    {
+      return "MASTERCARD";
+    }
+  }
+  // visa start with 4 and are 16 or 13 digits
+  else if((first_two / 10) == 4)
+  {
+    if (card_length == 16 || card_length == 13)
+    {
+      return "VISA";
+    }
+    else
+    {
+      return "INVALID";
+    }
+  }
+  else
+  {
+    return "INVALID";
+  }
+}
+
+int first_sum(int, long int);
+int second_sum(int, long int);
+int luhn_check(long int card_number, int card_length)
+{
+  int f_sum = first_sum(card_length, card_number);
+  int s_sum = second_sum(card_length, card_number);
+
+  if((f_sum + s_sum) % 10 == 0)
   {
     return 1;
   }
@@ -80,42 +107,35 @@ int length_check(long int n)
   }
 }
 
-int get_first_two(long int, int);
-char* get_card_type(long int n, int l)
+int first_sum(int card_length, long int card_number)
 {
-  int first_two = get_first_two(n, l);
-  // All American Express numbers start with 34 or 37
-  if (first_two == 34 || first_two == 37)
+  int sum = 0;
+  for(int i = 1; i < card_length; i += 2)
   {
-    return "AMEX";
+    int long base = card_number / ((long int) pow(10, i));
+    int target_int = base % 10 * 2;
+
+    sum += target_int % 10;
+    sum += target_int / 10;
   }
-  // most MasterCard numbers start with 51, 52, 53, 54, or 55 
-  else if(first_two >= 51 && first_two <= 55)
-  {
-    return "MASTERCARD";
-  }
-  // visa start with 4
-  else if((first_two / 10) == 4)
-  {
-    return "VISA";
-  }
-  else
-  {
-    return "INVALID";
-  }
+  return sum;
 }
 
-int get_first_two(long int n, int l)
+int second_sum(int card_length, long int card_number)
 {
-  return (int) (n / (long int) pow (10, l-2));
-}
+  int sum = 0;
 
-int luhn_check(int n)
-{
-  // Multiply every other digit by 2, starting with the number’s second-to-last digit, and then add those products’ digits together.
-  // Add the sum to the sum of the digits that weren’t multiplied by 2.
-  // If the total’s last digit is 0 (or, put more formally, if the total modulo 10 is congruent to 0), the number is valid!
-
-
-  return 1;
+  for(int i = 0; i < card_length; i += 2)
+  {
+    if (i == 0)
+    {
+      sum += card_number % 10;
+    }
+    else
+    {
+      long int base = card_number / ((long int) pow(10, i));
+      sum += base % 10;
+    }
+  }
+  return sum;
 }
