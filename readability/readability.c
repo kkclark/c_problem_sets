@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+// for string type and get_string()
 #include <cs50.h>
 
 const int MIN_UNDERCASE = 65; // a
@@ -16,31 +17,38 @@ int total_sentences(char*);
 int total_words(char*);
 int main(void)
 {
-  string usr_input = get_string("whats your flavor?\n");
+  string usr_input = get_string("text:");
 
-  int grade = (0.0588 * total_letters(usr_input)) - (0.296 * total_sentences(usr_input)) - 15.8;
+  int tls = total_letters(usr_input);
+  int tws = total_words(usr_input);
+  int tss = total_sentences(usr_input);
 
-  if(grade > 16)
+  // the average number of letters per 100 words in the text
+  float avg_letters = tls / (float) tws * 100;
+
+  // the average number of sentences per 100 words in the text
+  float avg_sentences = tss / (float) tws * 100;
+
+  // index = 0.0588 * L - 0.296 * S - 15.8
+  float grade = 0.0588 * avg_letters - 0.296 * avg_sentences - 15.8;
+
+  if(grade < 1)
   {
-    printf("ttl_letters: %i\n", total_letters(usr_input));
-    printf("ttl_words: %i\n", total_words(usr_input));
-    printf("ttl_sentences: %i\n", total_sentences(usr_input));
-    printf("Grade: %i\n", grade);
-    return 0;
+    printf("Before Grade 1\n");
+  }
+  else if (grade < 16)
+  {
+    printf("Grade %.f\n", grade);
   }
   else
   {
-    printf("ttl_letters: %i\n", total_letters(usr_input));
-    printf("ttl_words: %i\n", total_words(usr_input));
-    printf("ttl_sentences: %i\n", total_sentences(usr_input));
-    printf("Grade 16+");
-    return 0;
+    printf("Grade 16+\n");
   }
 }
 
 int total_letters(char* usr_input)
 {
-  int ttl = 0;
+  int total = 0;
 
   //increment if letter is within asci range
   //A-Z = 65-90 inclusive
@@ -51,25 +59,15 @@ int total_letters(char* usr_input)
 
     if((character >= MIN_UNDERCASE && character <= MAX_UNDERCASE) || (character >= MIN_UPPERCASE && character <= MAX_UPPERCASE))
     {
-      printf("%c is a char\n", character);
-      ttl++;
-    }
-    else if(character == 32)
-    {
-      printf("space\n");
-    }
-    else
-    {
-      printf("%c is not a char\n", character);
+      total++;
     }
   }
-
-  return ttl;
+  return total;
 }
 
 int total_words(char* usr_input)
 {
-  int ttl = 0;
+  int total = 0;
 
   for(int i = 0; i < strlen(usr_input); i++)
   {
@@ -77,17 +75,16 @@ int total_words(char* usr_input)
 
     if(character == 32)
     {
-      ttl++;
+      total++;
     }
   }
-
   // total spaces plus one
-  return ttl + 1;
+  return total + 1;
 }
 
 int total_sentences(char* usr_input)
 {
-  int ttl = 0;
+  int total = 0;
 
   for(int i = 0; i < strlen(usr_input); i++)
   {
@@ -95,9 +92,8 @@ int total_sentences(char* usr_input)
 
     if(character == PERIOD || character == QUESTION_MARK || character == EXCLAMATION)
     {
-      ttl++;
+      total++;
     }
   }
-
-  return ttl;
+  return total;
 }
