@@ -71,7 +71,7 @@ int main(int argc, string argv[])
   return 0;
 }
 
-// given a string find the first index that contains value char
+// given a string find the first index what contains value char
 int index_of(char* str, char chr)
 {
   for(int i = 0; i < strlen(str); i++)
